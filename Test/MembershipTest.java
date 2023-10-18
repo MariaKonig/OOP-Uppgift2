@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MembershipTest {
-    Path path = Paths.get("Test/TestPT.txt");
     Membership m = new Membership();
+    Path path = Paths.get("Test/TestPT.txt");
 
     public ArrayList<Member> getTestMemberList() {
         ArrayList<Member> membersList = new ArrayList<>();
@@ -48,9 +48,9 @@ class MembershipTest {
 
     @Test
     void createMemberTest() {
-        String testNameAndIdnr = "7502031234, Anna Andersson";
+        String testNameAndPnr = "7502031234, Anna Andersson";
         String testDate = "2023-05-03";
-        Member testMember = m.createMember(testNameAndIdnr, testDate);
+        Member testMember = m.createMember(testNameAndPnr, testDate);
 
         assert testMember != null;
         assertEquals("7502031234", testMember.getIdNr());
@@ -60,10 +60,10 @@ class MembershipTest {
     }
 
     @Test
-    void createAllMemberTest(){
+    void createAllMemberTest() {
         ArrayList<String[]> stringList = new ArrayList<>();
-        stringList.add(new String[]{"7502031234, Anna Andersson","2023-05-03"});
-        stringList.add(new String[]{"8505132345, Per Persson","2019-12-29"});
+        stringList.add(new String[]{"7502031234, Anna Andersson", "2023-05-03"});
+        stringList.add(new String[]{"8505132345, Per Persson", "2019-12-29"});
         ArrayList<Member> memberList = m.createAllMembers(stringList);
 
         assertEquals(2, memberList.size());
@@ -112,9 +112,9 @@ class MembershipTest {
     @Test
     void testSetDaysOfWorkOutToList() {
         ArrayList<Member> list = getTestMemberList();
-        list.get(0).addWorkoutDate(LocalDate.now().toString());
-        ArrayList<String> workOutlist = list.get(0).getWorkoutDates();
-        assertEquals(LocalDate.now().toString(), workOutlist.get(0));
+        list.get(0).setWorkoutDate(LocalDate.now().toString());
+        ArrayList<String> workOutList = list.get(0).getWorkoutDates();
+        assertEquals(LocalDate.now().toString(), workOutList.get(0));
     }
 
     @Test
@@ -132,7 +132,7 @@ class MembershipTest {
     }
 
     @Test
-    void createFiletest() throws Exception {
+    void createFileTest(){
         m.createFile(path);
         ArrayList<Member> list = getTestMemberList();
 
@@ -149,37 +149,36 @@ class MembershipTest {
             e.printStackTrace();
         }
     }
+
     @Test
-    void writeCorrectDataToFileTest(){
+    void writeCorrectDataToFileTest() {
         ArrayList<Member> list = getTestMemberList();
-        list.get(0).addWorkoutDate("2023-08-10");
-        list.get(0).addWorkoutDate("2023-09-10");
-        list.get(0).addWorkoutDate("2023-10-23");
-        m.writeDataToFile(list,path);
-        try (BufferedReader br = Files.newBufferedReader(path)){
-            assertEquals( "7502031234, Anna Andersson",br.readLine());
-            assertEquals("2023-08-10, 2023-09-10, 2023-10-23",br.readLine());
+        list.get(0).setWorkoutDate("2023-08-10");
+        list.get(0).setWorkoutDate("2023-09-10");
+        list.get(0).setWorkoutDate("2023-10-23");
+        m.writeDataToFile(list, path);
+        try (BufferedReader br = Files.newBufferedReader(path)) {
+            assertEquals("7502031234, Anna Andersson", br.readLine());
+            assertEquals("2023-08-10, 2023-09-10, 2023-10-23", br.readLine());
             assertNull(br.readLine());
             Files.delete(path);
-        }
-        catch(IOException e) {
-           e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Test
-    void readWorkOutHistoryTest(){
+    void readWorkOutHistoryTest() {
         ArrayList<Member> list = getTestMemberList();
         Path path = Paths.get("Test/workoutHistoryTest.txt");
         Member testMember1 = list.get(0);
         assertTrue(testMember1.getWorkoutDates().isEmpty());
-        m.readWorkOutHistory(list, path);
+        m.readWorkoutHistory(list, path);
         assertFalse(testMember1.getWorkoutDates().isEmpty());
     }
 
-
     @Test
-    void inputReadsCorrectTest()throws Exception{
+    void inputReadsCorrectTest() throws IllegalArgumentException {
         m.test = true;
         String testInput = "anna andersson";
         String testInputWithSpace = "  7502031234  ";
@@ -188,14 +187,17 @@ class MembershipTest {
     }
 
     @Test
-    void readInputThrowsExceptionTest()throws Exception{
+    void inputIsValidTest() throws IllegalArgumentException {
         m.test = true;
         String testInputWithInvalidCharacter = "@nn@ Andersson";
         String testInputTooManyNumbers = "75020312340";
         String testInputWrongFormat = "750203-1234";
+        String testValidString = "7502031234";
 
-        assertThrows(IllegalArgumentException.class,()->m.readInput(testInputWithInvalidCharacter));
-        assertThrows(IllegalArgumentException.class,()->m.readInput(testInputTooManyNumbers));
-        assertThrows(IllegalArgumentException.class,()->m.readInput(testInputWrongFormat));
+        assertFalse(m.isValidInput(testInputWithInvalidCharacter));
+        assertFalse(m.isValidInput(testInputTooManyNumbers));
+        assertFalse(m.isValidInput(testInputWrongFormat));
+        assertTrue(m.isValidInput(testValidString));
+
     }
 }

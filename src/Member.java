@@ -39,7 +39,7 @@ public class Member {
         return workoutDates;
     }
 
-    public void addWorkoutDate(String dateOfGymVisit) {
+    public void setWorkoutDate(String dateOfGymVisit) {
 
         workoutDates.add(dateOfGymVisit);
     }

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 
+
 public class Membership {
 
     public Boolean test = false;
@@ -32,10 +33,11 @@ public class Membership {
         member.add(date.trim());
         return new Member(member);
     }
-    public ArrayList<Member> createAllMembers(ArrayList<String[]> stringList){
+
+    public ArrayList<Member> createAllMembers(ArrayList<String[]> stringList) {
         ArrayList<Member> memberList = new ArrayList<>();
-        for(String[] s : stringList){
-           memberList.add(createMember(s[0],s[1]));
+        for (String[] s : stringList) {
+            memberList.add(createMember(s[0], s[1]));
         }
         return memberList;
     }
@@ -75,16 +77,16 @@ public class Membership {
         member.setHasActiveMembership(status);
     }
 
-    public String personSearch(String id, ArrayList<Member> list, LocalDate dateNow) {
+    public String personSearch(String id, ArrayList<Member> list, LocalDate today) {
         Member member = findMemberInList(id, list);
         if (member == null) {
             return "obehörig";
         }
-        setMembershipStatus(member, dateNow);
+        setMembershipStatus(member, today);
         if (!member.getHasActiveMembership()) {
             return "f.d. kund";
         } else {
-            member.addWorkoutDate(dateNow.toString());
+            member.setWorkoutDate(today.toString());
             return "kund";
         }
     }
@@ -109,12 +111,12 @@ public class Membership {
                     bw.write(", ");
                     bw.write(member.getName());
                     bw.write("\n");
-                    for(int i = 0; i<member.getWorkoutDates().size(); i++ ){
+                    for (int i = 0; i < member.getWorkoutDates().size(); i++) {
                         String date = member.getWorkoutDates().get(i);
                         bw.write(date);
-                        if(i < member.getWorkoutDates().size()-1){
+                        if (i < member.getWorkoutDates().size() - 1) {
                             bw.write(", ");
-                        }else{
+                        } else {
                             bw.write("\n");
                         }
                     }
@@ -125,15 +127,18 @@ public class Membership {
         }
     }
 
-    public String readInput(String OptionalText) throws IllegalArgumentException {
-        String input;
+    public String readInput(String OptionalText) {
+        String input = "";
         if (test) {
             input = OptionalText;
         } else {
-            input = JOptionPane.showInputDialog(null, "Besökare: Namn Efternamn / personnr ÅÅÅÅMMDD");
+            input = JOptionPane.showInputDialog("Besökare: Namn Efternamn / personNr ÅÅÅÅMMDD");
+        }
+        if (input == null) {
+            return null;
         }
         if (!isValidInput(input)) {
-            throw new IllegalArgumentException();
+            return "Ogiltigt format";
         }
         return input.trim();
     }
@@ -142,58 +147,47 @@ public class Membership {
         input = input.trim();
         if (input.length() == 10 && Character.isDigit(input.charAt(0))) {
             return true;
-        } else if (input.contains(" ") && Character.isLetter(input.charAt(0))) {
-            return true;
-        } else {
-            return false;
-        }
+        } else return input.contains(" ") && Character.isLetter(input.charAt(0));
     }
 
 
-    public String getInput() {
-        String input = "";
-        try {
-            input = readInput("");
+    public void readWorkoutHistory(ArrayList<Member> memberList, Path path) {
 
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(null, "Ogiltigt format på indata");
-        }
-        return input.trim();
-    }
+        if (Files.exists(path)) {
+            ArrayList<String[]> workOutData = readFromFile(path);
 
-    public void readWorkOutHistory(ArrayList<Member> memberList, Path path){
-
-        ArrayList<String []> workOutData = readFromFile(path);
-        for(int i = 0; i<(workOutData.size()); i++){
-            String[] memberData = workOutData.get(i)[0].split(",");
-            String[] dates = workOutData.get(i)[1].split(",");
-            Member member = findMemberInList(memberData[0],memberList);
-            for (String date : dates) {
-                member.addWorkoutDate(date);
+            for (String[] memberWorkout : workOutData) {
+                String[] personalInfo = memberWorkout[0].split(",");
+                String[] workoutDates = memberWorkout[1].split(",");
+                Member member = findMemberInList(personalInfo[0], memberList);
+                for (String date : workoutDates) {
+                    member.setWorkoutDate(date);
+                }
             }
         }
     }
 
+    public void run() {
 
-
-/*
-
-    public void run(){
-        ArrayList<String[]> arrayList = readFromFile(readPath);
-        ArrayList<Members> members = createAllMembers(arrayList);
-        readMembersWorkoutHistory(members,PTFile)
-        String input = getInput();
-        String output = personSearch(input, members, LocalDate.now());
-        JOptionPane.showMessageDialog(null,output);
-        writeDataToFile(members, writePath);
+        ArrayList<String[]> arrayList = readFromFile(memberFile);
+        ArrayList<Member> members = createAllMembers(arrayList);
+        readWorkoutHistory(members, PTFile);
+        while (true) {
+            String input = readInput("");
+            if (input == null) {
+                break;
+            } else if (input.equals("Ogiltigt format")) {
+                JOptionPane.showMessageDialog(null, input);
+                continue;
+            }
+            String output = personSearch(input, members, LocalDate.now());
+            JOptionPane.showMessageDialog(null, output);
+        }
+        writeDataToFile(members, PTFile);
     }
-
-
 
     public static void main(String[] args) {
         Membership today = new Membership();
         today.run();
     }
-*/
-
 }
