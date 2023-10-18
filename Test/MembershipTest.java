@@ -125,10 +125,10 @@ class MembershipTest {
         String search2 = "Per Persson";
         String search3 = "Pelle Snyltare";
         String search4 = "Anna";
-        assertEquals("kund", m.personSearch(search1, list, testDate));
-        assertEquals("f.d. kund", m.personSearch(search2, list, testDate));
-        assertEquals("obehörig", m.personSearch(search3, list, testDate));
-        assertEquals("obehörig", m.personSearch(search4, list, testDate));
+        assertEquals("kund", m.processInput(search1, list, testDate));
+        assertEquals("f.d. kund", m.processInput(search2, list, testDate));
+        assertEquals("obehörig", m.processInput(search3, list, testDate));
+        assertEquals("obehörig", m.processInput(search4, list, testDate));
     }
 
     @Test

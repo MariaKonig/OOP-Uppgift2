@@ -77,7 +77,7 @@ public class Membership {
         member.setHasActiveMembership(status);
     }
 
-    public String personSearch(String id, ArrayList<Member> list, LocalDate today) {
+    public String processInput(String id, ArrayList<Member> list, LocalDate today) {
         Member member = findMemberInList(id, list);
         if (member == null) {
             return "obehörig";
@@ -128,7 +128,7 @@ public class Membership {
     }
 
     public String readInput(String OptionalText) {
-        String input = "";
+        String input;
         if (test) {
             input = OptionalText;
         } else {
@@ -180,7 +180,7 @@ public class Membership {
                 JOptionPane.showMessageDialog(null, input);
                 continue;
             }
-            String output = personSearch(input, members, LocalDate.now());
+            String output = processInput(input, members, LocalDate.now());
             JOptionPane.showMessageDialog(null, output);
         }
         writeDataToFile(members, PTFile);
