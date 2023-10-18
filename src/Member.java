@@ -6,7 +6,7 @@ public class Member {
     protected String name;
     protected String membershipDate;
     protected Boolean hasActiveMembership;
-    protected ArrayList<String> workOutDates = new ArrayList<>();
+    protected ArrayList<String> workoutDates = new ArrayList<>();
 
 
     public Member(ArrayList<String> personalData){
@@ -35,12 +35,12 @@ public class Member {
         hasActiveMembership = status;
     }
 
-    public ArrayList<String> getWorkOutDates() {
-        return workOutDates;
+    public ArrayList<String> getWorkoutDates() {
+        return workoutDates;
     }
 
-    public void setWorkOutDates(String dateOfGymVisit) {
+    public void addWorkoutDate(String dateOfGymVisit) {
 
-        workOutDates.add(dateOfGymVisit);
+        workoutDates.add(dateOfGymVisit);
     }
 }

@@ -30,6 +30,7 @@ class MembershipTest {
         Member m2 = new Member(arrList2);
         membersList.add(m1);
         membersList.add(m2);
+
         return membersList;
     }
 
@@ -59,14 +60,26 @@ class MembershipTest {
     }
 
     @Test
+    void createAllMemberTest(){
+        ArrayList<String[]> stringList = new ArrayList<>();
+        stringList.add(new String[]{"7502031234, Anna Andersson","2023-05-03"});
+        stringList.add(new String[]{"8505132345, Per Persson","2019-12-29"});
+        ArrayList<Member> memberList = m.createAllMembers(stringList);
+
+        assertEquals(2, memberList.size());
+        assertEquals("Anna Andersson", memberList.get(0).getName());
+        assertEquals("2019-12-29", memberList.get(1).getMembershipDate());
+    }
+
+    @Test
     void readsFromFileTest() {
         Path path = Paths.get("Test/TestData.txt");
-        ArrayList<Member> list = m.readFromFile(path);
+        ArrayList<String[]> list = m.readFromFile(path);
 
         assert (list.get(0) != null);
         assertEquals(2, list.size());
-        assertEquals("Anna Andersson", list.get(0).getName());
-        assertEquals("2019-12-29", list.get(1).getMembershipDate());
+        assertEquals("7502031234, Anna Andersson", list.get(0)[0]);
+        assertEquals("2019-12-29", list.get(1)[1]);
 
     }
 
@@ -99,8 +112,8 @@ class MembershipTest {
     @Test
     void testSetDaysOfWorkOutToList() {
         ArrayList<Member> list = getTestMemberList();
-        list.get(0).setWorkOutDates(LocalDate.now().toString());
-        ArrayList<String> workOutlist = list.get(0).getWorkOutDates();
+        list.get(0).addWorkoutDate(LocalDate.now().toString());
+        ArrayList<String> workOutlist = list.get(0).getWorkoutDates();
         assertEquals(LocalDate.now().toString(), workOutlist.get(0));
     }
 
@@ -139,15 +152,13 @@ class MembershipTest {
     @Test
     void writeCorrectDataToFileTest(){
         ArrayList<Member> list = getTestMemberList();
-        list.get(0).setWorkOutDates("2023-08-10");
-        list.get(0).setWorkOutDates("2023-09-10");
-        list.get(0).setWorkOutDates("2023-10-23");
+        list.get(0).addWorkoutDate("2023-08-10");
+        list.get(0).addWorkoutDate("2023-09-10");
+        list.get(0).addWorkoutDate("2023-10-23");
         m.writeDataToFile(list,path);
         try (BufferedReader br = Files.newBufferedReader(path)){
             assertEquals( "7502031234, Anna Andersson",br.readLine());
-            assertEquals("2023-08-10",br.readLine());
-            assertEquals("2023-09-10",br.readLine());
-            assertEquals("2023-10-23",br.readLine());
+            assertEquals("2023-08-10, 2023-09-10, 2023-10-23",br.readLine());
             assertNull(br.readLine());
             Files.delete(path);
         }
@@ -155,6 +166,18 @@ class MembershipTest {
            e.printStackTrace();
         }
     }
+
+    @Test
+    void readWorkOutHistoryTest(){
+        ArrayList<Member> list = getTestMemberList();
+        Path path = Paths.get("Test/workoutHistoryTest.txt");
+        Member testMember1 = list.get(0);
+        assertTrue(testMember1.getWorkoutDates().isEmpty());
+        m.readWorkOutHistory(list, path);
+        assertFalse(testMember1.getWorkoutDates().isEmpty());
+    }
+
+
     @Test
     void inputReadsCorrectTest()throws Exception{
         m.test = true;

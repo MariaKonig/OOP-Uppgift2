@@ -12,8 +12,8 @@ import java.util.ArrayList;
 public class Membership {
 
     public Boolean test = false;
-    public Path readPath = Paths.get("Uppgift2/src/customers.txt");
-    public Path writePath = Paths.get("Uppgift2/src/PT.txt");
+    public Path memberFile = Paths.get("Uppgift2/src/customers.txt");
+    public Path PTFile = Paths.get("Uppgift2/src/PT.txt");
 
 
     public Boolean getIsLessThanAYear(LocalDate fromDate, LocalDate toDate) {
@@ -32,60 +32,65 @@ public class Membership {
         member.add(date.trim());
         return new Member(member);
     }
+    public ArrayList<Member> createAllMembers(ArrayList<String[]> stringList){
+        ArrayList<Member> memberList = new ArrayList<>();
+        for(String[] s : stringList){
+           memberList.add(createMember(s[0],s[1]));
+        }
+        return memberList;
+    }
 
-    public ArrayList<Member> readFromFile(Path path) {
+    public ArrayList<String[]> readFromFile(Path path) {
 
         String line1;
         String line2;
-        Member member;
-        ArrayList<Member> memberList = new ArrayList<>();
+        ArrayList<String[]> list = new ArrayList<>();
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             while ((line1 = reader.readLine()) != null) {
                 line2 = reader.readLine();
-                member = createMember(line1, line2);
-                memberList.add(member);
+                list.add(new String[]{line1, line2});
             }
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             System.out.println("Filen hittades inte");
         }
-        return memberList;
+        return list;
     }
-    public Member findMemberInList(String id, ArrayList<Member> list){
+
+    public Member findMemberInList(String id, ArrayList<Member> list) {
         id = id.trim();
 
-        for(Member member : list){
-            if(id.equals(member.getIdNr()) || id.equalsIgnoreCase(member.getName())){
+        for (Member member : list) {
+            if (id.equals(member.getIdNr()) || id.equalsIgnoreCase(member.getName())) {
                 return member;
             }
         }
-       return null;
+        return null;
     }
 
-    public void setMembershipStatus(Member member, LocalDate dateNow){
-        String signedDate = member.getMembershipDate();
-        LocalDate membershipDate = LocalDate.parse(signedDate);
-        Boolean status = getIsLessThanAYear(membershipDate,dateNow);
+    public void setMembershipStatus(Member member, LocalDate toDate) {
+        String stringFromDate = member.getMembershipDate();
+        LocalDate fromDate = LocalDate.parse(stringFromDate);
+        Boolean status = getIsLessThanAYear(fromDate, toDate);
         member.setHasActiveMembership(status);
     }
 
-    public String personSearch(String id, ArrayList<Member> list,LocalDate dateNow){
-        Member member = findMemberInList(id,list);
-        if(member==null){
+    public String personSearch(String id, ArrayList<Member> list, LocalDate dateNow) {
+        Member member = findMemberInList(id, list);
+        if (member == null) {
             return "obehörig";
         }
-        setMembershipStatus(member,dateNow);
-        if(!member.getHasActiveMembership()){
+        setMembershipStatus(member, dateNow);
+        if (!member.getHasActiveMembership()) {
             return "f.d. kund";
-        }else{
-            member.setWorkOutDates(dateNow.toString());
+        } else {
+            member.addWorkoutDate(dateNow.toString());
             return "kund";
         }
     }
-    public void createFile(Path path){
 
-        if(!Files.exists(path)) {
+    public void createFile(Path path) {
+        if (!Files.exists(path)) {
             try {
                 Files.createFile(path);
             } catch (IOException e) {
@@ -94,76 +99,101 @@ public class Membership {
         }
     }
 
-    public void writeDataToFile(ArrayList<Member> list, Path path){
+    public void writeDataToFile(ArrayList<Member> list, Path path) {
         createFile(path);
 
-        try(BufferedWriter bw = Files.newBufferedWriter(path)){
-            for(Member member : list){
-                if(!(member.getWorkOutDates().isEmpty())){
+        try (BufferedWriter bw = Files.newBufferedWriter(path)) {
+            for (Member member : list) {
+                if (!(member.getWorkoutDates().isEmpty())) {
                     bw.write(member.getIdNr());
                     bw.write(", ");
                     bw.write(member.getName());
                     bw.write("\n");
-                    for(String date : member.getWorkOutDates()){
+                    for(int i = 0; i<member.getWorkoutDates().size(); i++ ){
+                        String date = member.getWorkoutDates().get(i);
                         bw.write(date);
-                        bw.write("\n");
+                        if(i < member.getWorkoutDates().size()-1){
+                            bw.write(", ");
+                        }else{
+                            bw.write("\n");
+                        }
                     }
                 }
             }
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public String readInput(String OptionalText)throws IllegalArgumentException{
+    public String readInput(String OptionalText) throws IllegalArgumentException {
         String input;
-        if(test){
+        if (test) {
             input = OptionalText;
+        } else {
+            input = JOptionPane.showInputDialog(null, "Besökare: Namn Efternamn / personnr ÅÅÅÅMMDD");
         }
-        else{
-            input = JOptionPane.showInputDialog(null,"Besökare: Namn Efternamn / personnr ÅÅÅÅMMDD");
-        }
-        if(!isValidInput(input)){
+        if (!isValidInput(input)) {
             throw new IllegalArgumentException();
         }
         return input.trim();
     }
 
-    public Boolean isValidInput(String input){
+    public Boolean isValidInput(String input) {
         input = input.trim();
-       if(input.length()==10 && Character.isDigit(input.charAt(0))){
-           return true;
-       } else if (input.contains(" ") && Character.isLetter(input.charAt(0))){
-           return true;
-       }else{
-           return false;
-       }
+        if (input.length() == 10 && Character.isDigit(input.charAt(0))) {
+            return true;
+        } else if (input.contains(" ") && Character.isLetter(input.charAt(0))) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
-    public String getInput(){
-        String input="";
-        try{
-             input = readInput("");
+    public String getInput() {
+        String input = "";
+        try {
+            input = readInput("");
 
-        }catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(null, "Ogiltigt format på indata");
         }
         return input.trim();
     }
 
+    public void readWorkOutHistory(ArrayList<Member> memberList, Path path){
+
+        ArrayList<String []> workOutData = readFromFile(path);
+        for(int i = 0; i<(workOutData.size()); i++){
+            String[] memberData = workOutData.get(i)[0].split(",");
+            String[] dates = workOutData.get(i)[1].split(",");
+            Member member = findMemberInList(memberData[0],memberList);
+            for (String date : dates) {
+                member.addWorkoutDate(date);
+            }
+        }
+    }
+
+
+
+/*
 
     public void run(){
-        ArrayList<Member> members = readFromFile(readPath);
+        ArrayList<String[]> arrayList = readFromFile(readPath);
+        ArrayList<Members> members = createAllMembers(arrayList);
+        readMembersWorkoutHistory(members,PTFile)
         String input = getInput();
         String output = personSearch(input, members, LocalDate.now());
         JOptionPane.showMessageDialog(null,output);
         writeDataToFile(members, writePath);
     }
 
+
+
     public static void main(String[] args) {
         Membership today = new Membership();
         today.run();
     }
+*/
+
 }
