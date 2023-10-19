@@ -1,5 +1,4 @@
 import org.junit.jupiter.api.Test;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MembershipTest {
     Membership m = new Membership();
+    FileHandler fH = new FileHandler();
     Path path = Paths.get("Test/TestPT.txt");
 
     public ArrayList<Member> getTestMemberList() {
@@ -50,7 +50,7 @@ class MembershipTest {
     void createMemberTest() {
         String testNameAndPnr = "7502031234, Anna Andersson";
         String testDate = "2023-05-03";
-        Member testMember = m.createMember(testNameAndPnr, testDate);
+        Member testMember = fH.createMember(testNameAndPnr, testDate);
 
         assert testMember != null;
         assertEquals("7502031234", testMember.getIdNr());
@@ -64,7 +64,7 @@ class MembershipTest {
         ArrayList<String[]> stringList = new ArrayList<>();
         stringList.add(new String[]{"7502031234, Anna Andersson", "2023-05-03"});
         stringList.add(new String[]{"8505132345, Per Persson", "2019-12-29"});
-        ArrayList<Member> memberList = m.createAllMembers(stringList);
+        ArrayList<Member> memberList = fH.createAllMembers(stringList);
 
         assertEquals(2, memberList.size());
         assertEquals("Anna Andersson", memberList.get(0).getName());
@@ -74,7 +74,7 @@ class MembershipTest {
     @Test
     void readsFromFileTest() {
         Path path = Paths.get("Test/TestData.txt");
-        ArrayList<String[]> list = m.readFromFile(path);
+        ArrayList<String[]> list = fH.readFromFile(path);
 
         assert (list.get(0) != null);
         assertEquals(2, list.size());
@@ -133,7 +133,7 @@ class MembershipTest {
 
     @Test
     void createFileTest(){
-        m.createFile(path);
+        fH.createFile(path);
         ArrayList<Member> list = getTestMemberList();
 
         try (BufferedReader br = Files.newBufferedReader(path);
@@ -156,7 +156,7 @@ class MembershipTest {
         list.get(0).setWorkoutDate("2023-08-10");
         list.get(0).setWorkoutDate("2023-09-10");
         list.get(0).setWorkoutDate("2023-10-23");
-        m.writeDataToFile(list, path);
+        fH.writeDataToFile(list, path);
         try (BufferedReader br = Files.newBufferedReader(path)) {
             assertEquals("7502031234, Anna Andersson", br.readLine());
             assertEquals("2023-08-10, 2023-09-10, 2023-10-23", br.readLine());
@@ -173,7 +173,7 @@ class MembershipTest {
         Path path = Paths.get("Test/workoutHistoryTest.txt");
         Member testMember1 = list.get(0);
         assertTrue(testMember1.getWorkoutDates().isEmpty());
-        m.readWorkoutHistory(list, path);
+        fH.readWorkoutHistory(list, path);
         assertFalse(testMember1.getWorkoutDates().isEmpty());
     }
 
