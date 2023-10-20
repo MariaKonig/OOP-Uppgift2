@@ -11,16 +11,6 @@ public class FileHandler {
     public Path ptFile = Paths.get("Uppgift2/src/PT.txt");
     Membership m = new Membership();
 
-    public ArrayList<Member> getMembersFromFile(){
-        ArrayList<String[]> arrayList = readFromFile(memberFile);
-        ArrayList<Member> members = createAllMembers(arrayList);
-        readWorkoutHistory(members, ptFile);
-        return members;
-    }
-    public void writeToPTFile(ArrayList<Member> members){
-        writeDataToFile(members, ptFile);
-    }
-
     public ArrayList<String[]> readFromFile(Path path) {
 
         String line1;
@@ -38,6 +28,15 @@ public class FileHandler {
         return list;
     }
 
+    public ArrayList<Member> createAllMembers(ArrayList<String[]> stringList) {
+        ArrayList<Member> memberList = new ArrayList<>();
+
+        for (String[] s : stringList) {
+            memberList.add(createMember(s[0], s[1]));
+        }
+        return memberList;
+    }
+
     public Member createMember(String personData, String date) {
 
         ArrayList<String> member = new ArrayList<>();
@@ -47,26 +46,15 @@ public class FileHandler {
         member.add(date.trim());
         return new Member(member);
     }
-
-    public ArrayList<Member> createAllMembers(ArrayList<String[]> stringList) {
-        ArrayList<Member> memberList = new ArrayList<>();
-        for (String[] s : stringList) {
-            memberList.add(createMember(s[0], s[1]));
-        }
-        return memberList;
+    //Samling-metod
+    public ArrayList<Member> getMembersFromFile(){
+        ArrayList<String[]> arrayList = readFromFile(memberFile);
+        ArrayList<Member> members = createAllMembers(arrayList);
+        setWorkoutHistory(members, ptFile);
+        return members;
     }
 
-    public void createFile(Path path) {
-        if (!Files.exists(path)) {
-            try {
-                Files.createFile(path);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void readWorkoutHistory(ArrayList<Member> memberList, Path path) {
+    public void setWorkoutHistory(ArrayList<Member> memberList, Path path) {
 
         if (Files.exists(path)) {
             ArrayList<String[]> workOutData = readFromFile(path);
@@ -82,20 +70,34 @@ public class FileHandler {
         }
     }
 
+    public void createFile(Path path) {
+        if (!Files.exists(path)) {
+            try {
+                Files.createFile(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void writeToPTFile(ArrayList<Member> members){
+        writeDataToFile(members, ptFile);
+    }
+
     public void writeDataToFile(ArrayList<Member> list, Path path) {
         createFile(path);
 
         try (BufferedWriter bw = Files.newBufferedWriter(path)) {
             for (Member member : list) {
-                if (!(member.getWorkoutDates().isEmpty())) {
+                if (!(member.getWorkoutList().isEmpty())) {
                     bw.write(member.getIdNr());
                     bw.write(", ");
                     bw.write(member.getName());
                     bw.write("\n");
-                    for (int i = 0; i < member.getWorkoutDates().size(); i++) {
-                        String date = member.getWorkoutDates().get(i);
+                    for (int i = 0; i < member.getWorkoutList().size(); i++) {
+                        String date = member.getWorkoutList().get(i);
                         bw.write(date);
-                        if (i < member.getWorkoutDates().size() - 1) {
+                        if (i < member.getWorkoutList().size() - 1) {
                             bw.write(", ");
                         } else {
                             bw.write("\n");

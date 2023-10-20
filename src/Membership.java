@@ -30,20 +30,6 @@ public class Membership {
         member.setHasActiveMembership(status);
     }
 
-    public String processInput(String id, ArrayList<Member> list, LocalDate today) {
-        Member member = findMemberInList(id, list);
-        if (member == null) {
-            return "obehörig";
-        }
-        setMembershipStatus(member, today);
-        if (!member.getHasActiveMembership()) {
-            return "f.d. kund";
-        } else {
-            member.setWorkoutDate(today.toString());
-            return "kund";
-        }
-    }
-
     public String readInput(String OptionalText) {
         String input;
         if (test) {
@@ -65,5 +51,19 @@ public class Membership {
         if (input.length() == 10 && Character.isDigit(input.charAt(0))) {
             return true;
         } else return input.contains(" ") && Character.isLetter(input.charAt(0));
+    }
+    //samlings-metod
+    public String processInput(String id, ArrayList<Member> list, LocalDate today) {
+        Member member = findMemberInList(id, list);
+        if (member == null) {
+            return "obehörig";
+        }
+        setMembershipStatus(member, today);
+        if (!member.getHasActiveMembership()) {
+            return "f.d. kund";
+        } else {
+            member.setWorkoutDate(today.toString());
+            return "kund";
+        }
     }
 }

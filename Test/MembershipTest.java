@@ -1,7 +1,6 @@
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class MembershipTest {
@@ -20,10 +19,11 @@ class MembershipTest {
     }
 
     @Test
-    void findMemberInTestList() {
+    void findMemberInListTest() {
         ArrayList<Member> list = tl.getTestMemberList();
         Member m1 = m.findMemberInList("Anna Andersson", list);
         Member m2 = m.findMemberInList("8505132345", list);
+
         assertEquals("7502031234", m1.getIdNr());
         assertEquals("Per Persson", m2.getName());
     }
@@ -46,29 +46,31 @@ class MembershipTest {
     }
 
     @Test
-    void testSetDaysOfWorkOutToList() {
+    void setWorkoutDateTest() {
         ArrayList<Member> list = tl.getTestMemberList();
-        list.get(0).setWorkoutDate(LocalDate.now().toString());
-        ArrayList<String> workOutList = list.get(0).getWorkoutDates();
+        Member anna = list.get(0);
+        anna.setWorkoutDate(LocalDate.now().toString());
+        ArrayList<String> workOutList = anna.getWorkoutList();
+
         assertEquals(LocalDate.now().toString(), workOutList.get(0));
     }
 
     @Test
-    void personSearchOutputTest() {
+    void outputPersonSearchTest() {
         ArrayList<Member> list = tl.getTestMemberList();
         LocalDate testDate = LocalDate.of(2023, 7, 27);
-        String search1 = "Anna Andersson";
-        String search2 = "Per Persson";
-        String search3 = "Pelle Snyltare";
-        String search4 = "Anna";
-        assertEquals("kund", m.processInput(search1, list, testDate));
-        assertEquals("f.d. kund", m.processInput(search2, list, testDate));
-        assertEquals("obehörig", m.processInput(search3, list, testDate));
-        assertEquals("obehörig", m.processInput(search4, list, testDate));
+        String isAMember = "Anna Andersson";
+        String exMember = "Per Persson";
+        String notAMember1 = "Pelle Snyltare";
+        String notAMember2 = "Anna";
+        assertEquals("kund", m.processInput(isAMember, list, testDate));
+        assertEquals("f.d. kund", m.processInput(exMember, list, testDate));
+        assertEquals("obehörig", m.processInput(notAMember1, list, testDate));
+        assertEquals("obehörig", m.processInput(notAMember2, list, testDate));
     }
 
     @Test
-    void inputReadsCorrectTest() throws IllegalArgumentException {
+    void readInputTrimsTest() {
         m.test = true;
         String testInput = "anna andersson";
         String testInputWithSpace = "  7502031234  ";
@@ -77,9 +79,9 @@ class MembershipTest {
     }
 
     @Test
-    void inputIsValidTest() throws IllegalArgumentException {
+    void inputIsValidTest() {
         m.test = true;
-        String testInputWithInvalidCharacter = "@nn@ Andersson";
+        String testInputWithInvalidCharacter = "@nna Andersson";
         String testInputTooManyNumbers = "75020312340";
         String testInputWrongFormat = "750203-1234";
         String testValidString = "7502031234";
